@@ -1,0 +1,2 @@
+WIZ_OK     = 0
+WIZ_ERROR  = 1
