@@ -53,6 +53,3 @@ async def wiz_onColour(ipAddr,r,g,b):
     if(True == await bulb_status(light)):
         opStatus = WIZ_OK
     return opStatus
-
-bulb_list = asyncio.run(wiz_discover())
-print(bulb_list)
