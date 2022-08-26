@@ -70,7 +70,10 @@ async def main():
     await command_handler()
     time.sleep(0.1)
 
-read_BulbsFromFile()
+try:
+    read_BulbsFromFile()
+except:
+    pass
 print(bulb_dict)
 loop = asyncio.new_event_loop()
 loop.run_until_complete(main())
