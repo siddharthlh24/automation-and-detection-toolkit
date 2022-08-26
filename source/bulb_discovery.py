@@ -12,7 +12,7 @@ async def main():
         #print(bulb.__dict__)
 
         dict_res = bulb.__dict__
-        ap = "a8bb50ffce04"
+        ap = "a8bb50ffce07"
 
         if(dict_res['mac']==ap):
             light = wizlight(dict_res['ip'])
