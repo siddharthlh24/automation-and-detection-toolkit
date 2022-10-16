@@ -54,16 +54,15 @@ async def command_handler():
     #command_id
     cmdId = int(sys.argv[1])
     cmdArg = sys.argv[2:]
-    match cmdId:
-        case commands.FACE_ON:
-            await wiz_on(bulb_dict[cmdArg[0]],int(cmdArg[1]))
-        case commands.FACE_OFF:
-            await wiz_off(bulb_dict[cmdArg[0]])
-        case commands.FACE_DISCOVER:
-            print(" looking for bulbs, please wait")
-            await refresh_bulbs()
-        case commands.FACE_RGB:
-            await wiz_onColour(bulb_dict[cmdArg[0]],int(cmdArg[1]),int(cmdArg[2]),int(cmdArg[3]))
+    if cmdId == commands.FACE_ON:
+        await wiz_on(bulb_dict[cmdArg[0]],int(cmdArg[1]))
+    elif cmdId == commands.FACE_OFF:
+        await wiz_off(bulb_dict[cmdArg[0]])
+    elif cmdId == commands.FACE_DISCOVER:
+        print(" looking for bulbs, please wait")
+        await refresh_bulbs()
+    elif cmdId == commands.FACE_RGB:
+        await wiz_onColour(bulb_dict[cmdArg[0]],int(cmdArg[1]),int(cmdArg[2]),int(cmdArg[3]))
 
 
 async def main():
