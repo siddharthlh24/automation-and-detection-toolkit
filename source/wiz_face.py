@@ -3,6 +3,8 @@ from wiz_utils import *
 from error_codes import *
 import time
 from functools import wraps
+import threading
+from queue import Queue
 import sys
 
 ## fix asyncio crying ##
@@ -50,10 +52,8 @@ async def refresh_bulbs():
     else:
         print(len(list_of_bulbs)," bulbs found")
 
-async def command_handler():
-    #command_id
-    cmdId = int(sys.argv[1])
-    cmdArg = sys.argv[2:]
+# command id is 1 argument , cmdArgs have further arguments
+async def command_handler(cmdId, cmdArg):
     if cmdId == commands.FACE_ON:
         await wiz_on(bulb_dict[cmdArg[0]],int(cmdArg[1]))
     elif cmdId == commands.FACE_OFF:
@@ -64,15 +64,52 @@ async def command_handler():
     elif cmdId == commands.FACE_RGB:
         await wiz_onColour(bulb_dict[cmdArg[0]],int(cmdArg[1]),int(cmdArg[2]),int(cmdArg[3]))
 
+global_bub_state = True
+bulb_acl = "a8bb50d28225"
+global_osTimer = None
+global_queue = Queue(maxsize = 3)
 
-async def main():
-    await command_handler()
-    time.sleep(0.1)
+async def toggle_diningLight_one():
+    global global_bub_state
+    if(global_bub_state):
+        print("turning on")
+        await command_handler(1,[bulb_acl,"100"])
+        global_bub_state = False
+    else:
+        print("turning OFF")
+        await command_handler(2,[bulb_acl])
+        global_bub_state = True
 
-try:
-    read_BulbsFromFile()
-except:
-    pass
-print(bulb_dict)
-loop = asyncio.new_event_loop()
-loop.run_until_complete(main())
+async def loop_main(msg_qID):
+    while(True):
+        if(not global_queue.empty()):
+            popped_msg = global_queue.get()
+            if(popped_msg == "1"):
+                await toggle_diningLight_one()
+
+def run_interables():
+    global global_osTimer
+    while(True):
+        print("time expired")
+        global_queue.put("1")
+        time.sleep(2)
+
+def wiz_face_init(msg_qID):
+    # attempt to pul ACLs from storage
+    try:
+        read_BulbsFromFile()
+    except Exception as e:
+        print("Exception occured",e)
+        pass
+    loop = asyncio.new_event_loop()
+    print("came here")
+
+    #start timer
+    global global_osTimer
+    thread = threading.Thread(target = run_interables)
+    thread.start()
+
+    loop.run_until_complete(loop_main(global_queue))
+    print("came here ?")
+
+wiz_face_init(global_queue)
